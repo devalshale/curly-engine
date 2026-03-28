@@ -19,3 +19,19 @@ message FindByIdResponse {
   string email = 2;
   // ... add other fields as needed
 }
+
+// The user service definition.
+service UserService {
+  // Deletes a user
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+}
+
+// The request message containing the user's ID to delete.
+message DeleteUserRequest {
+  string id = 1;
+}
+
+// The response message indicating success.
+message DeleteUserResponse {
+  bool success = 1;
+}
