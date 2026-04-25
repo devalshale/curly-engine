@@ -9,6 +9,9 @@ pub mod customer_service {
 use customer_service::customer_service_server::{CustomerService, CustomerServiceServer};
 use customer_service::{FindByIdRequest, FindByIdResponse};
 
+use customer_service::user_service_server::{UserService, UserServiceServer};
+use customer_service::{DeleteUserRequest, DeleteUserResponse};
+
 pub struct MyCustomerService;
 
 #[tonic::async_trait]
@@ -30,17 +33,38 @@ impl CustomerService for MyCustomerService {
     }
 }
 
+pub struct MyUserService;
+
+#[tonic::async_trait]
+impl UserService for MyUserService {
+    async fn delete_user(
+        &self,
+        request: Request<DeleteUserRequest>,
+    ) -> Result<Response<DeleteUserResponse>, Status> {
+        let id = request.into_inner().id;
+        println!("Got a request to delete user {:?}", id);
+
+        let response = DeleteUserResponse {
+            success: true,
+        };
+
+        Ok(Response::new(response))
+    }
+}
+
 pub async fn serve(port: u16) -> std::io::Result<()> {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, e))?;
 
     let service = MyCustomerService;
+    let user_service = MyUserService;
 
     println!("📡 gRPC server initiating on port {}", port);
 
     let server = Server::builder()
         .add_service(CustomerServiceServer::new(service))
+        .add_service(UserServiceServer::new(user_service))
         .serve(addr);
 
     server.await.map_err(|e| {
